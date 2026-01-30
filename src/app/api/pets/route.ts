@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -71,6 +72,7 @@ export async function POST(req: Request) {
             },
         });
 
+        revalidatePath("/");
         return NextResponse.json(pet, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: "Erro ao criar pet" }, { status: 500 });
