@@ -1,14 +1,14 @@
 import { auth } from "@/auth";
-import { Navbar } from "@/components/dashboard/navbar";
-import { PetCard } from "@/components/dashboard/pet-card";
-import { PetDialog } from "@/components/dashboard/pet-dialog";
-import { SearchInput } from "@/components/dashboard/search-input";
+import { Navbar } from "@/modules/pets/components/navbar";
+import { PetCard } from "@/modules/pets/components/pet-card";
+import { PetDialog } from "@/modules/pets/components/pet-dialog";
+import { SearchInput } from "@/modules/pets/components/search-input";
 import { prisma } from "@/lib/prisma";
 
 export default async function Home({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await auth();
   const params = await searchParams;
@@ -28,7 +28,7 @@ export default async function Home({
   });
 
   // Serialization of usage dates to avoid Client Component errors
-  const serializedPets = pets.map((pet) => ({
+  const serializedPets = pets.map((pet: any) => ({
     ...pet,
     createdAt: pet.createdAt.toISOString(),
     updatedAt: pet.updatedAt.toISOString(),

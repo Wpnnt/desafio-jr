@@ -4,15 +4,16 @@ import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { PetSchema } from "@/schemas";
-import { Button } from "@/components/ui/button";
+import { PetSchema } from "@/modules/pets/schemas";
+import { Button } from "@/shared/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/shared/components/ui/dialog";
+import { Pet } from "@prisma/client";
 import {
     Form,
     FormControl,
@@ -20,20 +21,20 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus } from "lucide-react";
 
 interface PetFormProps {
-    pet?: any; // Replace with proper type
+    pet?: Pet; // Replace with proper type
     trigger?: React.ReactNode;
     mode?: "create" | "edit";
 }
@@ -44,7 +45,7 @@ export function PetDialog({ pet, trigger, mode = "create" }: PetFormProps) {
     const router = useRouter();
 
     const form = useForm<z.infer<typeof PetSchema>>({
-        resolver: zodResolver(PetSchema),
+        resolver: zodResolver(PetSchema) as any,
         defaultValues: {
             name: "",
             age: 0,

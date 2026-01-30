@@ -4,8 +4,8 @@ import { useTransition, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { RegisterSchema } from "@/schemas";
-import { Input } from "@/components/ui/input";
+import { LoginSchema } from "@/modules/auth/schemas";
+import { Input } from "@/shared/components/ui/input";
 import {
     Form,
     FormControl,
@@ -13,81 +13,47 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+} from "@/shared/components/ui/form";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/shared/components/ui/card";
+import { login } from "@/modules/auth/actions/login";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-export const RegisterForm = () => {
+export const LoginForm = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition();
-    const router = useRouter();
 
-    const form = useForm<z.infer<typeof RegisterSchema>>({
-        resolver: zodResolver(RegisterSchema),
+    const form = useForm<z.infer<typeof LoginSchema>>({
+        resolver: zodResolver(LoginSchema),
         defaultValues: {
             email: "",
             password: "",
-            name: "",
         },
     });
 
-    const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
+    const onSubmit = (values: z.infer<typeof LoginSchema>) => {
         setError("");
         setSuccess("");
 
-        startTransition(async () => {
-            try {
-                const response = await fetch("/api/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(values),
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
+        startTransition(() => {
+            login(values).then((data) => {
+                if (data?.error) {
                     setError(data.error);
-                } else {
-                    setSuccess(data.success);
-                    setTimeout(() => {
-                        router.push("/login");
-                    }, 2000);
                 }
-            } catch (err) {
-                setError("Algo deu errado.");
-            }
+            });
         });
     };
 
     return (
         <Card className="w-[400px]">
             <CardHeader>
-                <CardTitle className="text-2xl text-center">Cadastro</CardTitle>
+                <CardTitle className="text-2xl text-center">Login</CardTitle>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nome</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                disabled={isPending}
-                                                placeholder="Seu nome"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -126,16 +92,15 @@ export const RegisterForm = () => {
                             />
                         </div>
                         {error && <div className="text-sm text-red-500 font-medium">{error}</div>}
-                        {success && <div className="text-sm text-green-500 font-medium">{success}</div>}
                         <Button disabled={isPending} type="submit" className="w-full">
-                            {isPending ? "Criando conta..." : "Criar Conta"}
+                            {isPending ? "Entrando..." : "Entrar"}
                         </Button>
                     </form>
                 </Form>
             </CardContent>
             <CardFooter className="justify-center">
-                <Link href="/login" className="text-sm text-blue-500 hover:underline">
-                    Já tem uma conta? Entre
+                <Link href="/register" className="text-sm text-blue-500 hover:underline">
+                    Não tem uma conta? Cadastre-se
                 </Link>
             </CardFooter>
         </Card>
