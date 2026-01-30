@@ -57,6 +57,7 @@ export const RegisterForm = () => {
                     }, 2000);
                 }
             } catch (err) {
+                console.error(err);
                 setError("Algo deu errado.");
             }
         });

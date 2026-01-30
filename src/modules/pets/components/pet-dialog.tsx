@@ -31,7 +31,7 @@ import {
     SelectValue,
 } from "@/shared/components/ui/select";
 import { useRouter } from "next/navigation";
-import { Pencil, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 interface PetFormProps {
     pet?: Pet; // Replace with proper type
@@ -45,6 +45,7 @@ export function PetDialog({ pet, trigger, mode = "create" }: PetFormProps) {
     const router = useRouter();
 
     const form = useForm<z.infer<typeof PetSchema>>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(PetSchema) as any,
         defaultValues: {
             name: "",

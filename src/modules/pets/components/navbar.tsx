@@ -1,19 +1,8 @@
-import { auth, signOut } from "@/auth";
-import { Button } from "@/shared/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
-import Link from "next/link";
+import { auth } from "@/auth";
+import { UserMenu } from "@/modules/user/components/user-menu";
 
 export async function Navbar() {
     const session = await auth();
-    const initial = session?.user?.name?.charAt(0).toUpperCase() || "U";
 
     return (
         <nav className="border-b bg-white dark:bg-gray-950 px-6 py-3 flex items-center justify-between">
@@ -26,40 +15,7 @@ export async function Navbar() {
             </div>
 
             <div className="flex items-center gap-4">
-                {session?.user && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                                <Avatar className="h-10 w-10">
-                                    <AvatarImage src={session.user.image || ""} alt={session.user.name || ""} />
-                                    <AvatarFallback>{initial}</AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end" forceMount>
-                            <DropdownMenuLabel className="font-normal">
-                                <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium leading-none">{session.user.name}</p>
-                                    <p className="text-xs leading-none text-muted-foreground">
-                                        {session.user.email}
-                                    </p>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <form
-                                    action={async () => {
-                                        "use server";
-                                        await signOut();
-                                    }}
-                                    className="w-full"
-                                >
-                                    <button className="w-full text-left cursor-default">Sair</button>
-                                </form>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                {session?.user && <UserMenu user={session.user} />}
             </div>
         </nav>
     );
