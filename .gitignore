@@ -41,3 +41,13 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+.vscode
+
+# Playwright
+/test-results/
+/playwright-report/
+.vercel
+playwright-report
+.vercel
+.env*.local

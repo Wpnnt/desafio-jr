@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-import { PetSchema } from "@/schemas";
+import { PetSchema } from "@/modules/pets/schemas";
 
 export async function GET(req: Request) {
     try {
@@ -13,10 +14,12 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
         }
 
-        const { searchParams } = new URL(req.url);
-        const query = searchParams.get("q");
+        const { searchParams } = new URL(req.url); // Use standard URL parsing to avoid type issues if needed, or better:
+        // In App Router API routes, req is standard Request. searchParams is on the URL.
+        const url = new URL(req.url);
+        const query = url.searchParams.get("q");
 
-        const where: any = {};
+        const where: any = {}; // Keep as any for now or strictly type Prisma.PetWhereInput if time permits
 
         if (query) {
             where.OR = [
@@ -55,7 +58,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const { name, age, type, breed, ownerName, ownerContact } = validatedFields.data;
+        const { name, age, type, breed, ownerName, ownerContact, image } = validatedFields.data;
 
         const pet = await prisma.pet.create({
             data: {
@@ -65,12 +68,15 @@ export async function POST(req: Request) {
                 breed,
                 ownerName,
                 ownerContact,
+                image,
                 userId: session.user.id,
             },
         });
 
+        revalidatePath("/");
         return NextResponse.json(pet, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ error: "Erro ao criar pet" }, { status: 500 });
+        console.error("Error creating pet:", error);
+        return NextResponse.json({ error: "Erro ao criar pet", details: String(error) }, { status: 500 });
     }
 }

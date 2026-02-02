@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { RegisterSchema } from "@/schemas";
+import { RegisterSchema } from "@/modules/auth/schemas";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
