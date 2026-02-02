@@ -58,7 +58,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const { name, age, type, breed, ownerName, ownerContact } = validatedFields.data;
+        const { name, age, type, breed, ownerName, ownerContact, image } = validatedFields.data;
 
         const pet = await prisma.pet.create({
             data: {
@@ -68,6 +68,7 @@ export async function POST(req: Request) {
                 breed,
                 ownerName,
                 ownerContact,
+                image,
                 userId: session.user.id,
             },
         });
@@ -75,6 +76,7 @@ export async function POST(req: Request) {
         revalidatePath("/");
         return NextResponse.json(pet, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ error: "Erro ao criar pet" }, { status: 500 });
+        console.error("Error creating pet:", error);
+        return NextResponse.json({ error: "Erro ao criar pet", details: String(error) }, { status: 500 });
     }
 }

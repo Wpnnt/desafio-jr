@@ -46,6 +46,7 @@ function AlertDialogOverlay({
 
 function AlertDialogContent({
   className,
+  children,
   size = "default",
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
@@ -58,11 +59,15 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         data-size={size}
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-lg",
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 group/alert-dialog-content fixed top-[50%] left-[50%] z-50 flex flex-col w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-2xl border p-0 shadow-lg duration-200 outline-none data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-lg overflow-hidden max-h-[min(95vh,800px)]",
           className
         )}
         {...props}
-      />
+      >
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-4">
+          {children}
+        </div>
+      </AlertDialogPrimitive.Content>
     </AlertDialogPortal>
   )
 }

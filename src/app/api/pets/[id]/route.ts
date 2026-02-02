@@ -1,16 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
-
-const PetSchema = z.object({
-    name: z.string().min(1, "Nome é obrigatório"),
-    age: z.coerce.number().min(0, "Idade deve ser maior ou igual a 0"),
-    type: z.enum(["DOG", "CAT"]),
-    breed: z.string().min(1, "Raça é obrigatória"),
-    ownerName: z.string().min(1, "Nome do dono é obrigatório"),
-    ownerContact: z.string().min(1, "Contato do dono é obrigatório"),
-});
+import { PetSchema } from "@/modules/pets/schemas";
 
 export async function PUT(
     req: Request,
@@ -36,7 +27,8 @@ export async function PUT(
         const validatedFields = PetSchema.safeParse(body);
 
         if (!validatedFields.success) {
-            return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+            console.error("Validation failed for PUT:", validatedFields.error.flatten());
+            return NextResponse.json({ error: "Dados inválidos", details: validatedFields.error.flatten() }, { status: 400 });
         }
 
         const updatedPet = await prisma.pet.update({
@@ -46,7 +38,8 @@ export async function PUT(
 
         return NextResponse.json(updatedPet);
     } catch (error) {
-        return NextResponse.json({ error: "Erro ao atualizar pet" }, { status: 500 });
+        console.error("Error updating pet:", error);
+        return NextResponse.json({ error: "Erro ao atualizar pet", details: String(error) }, { status: 500 });
     }
 }
 

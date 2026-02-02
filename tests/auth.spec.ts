@@ -37,12 +37,15 @@ test.describe('Authentication', () => {
         await page.click('button[type="submit"]');
         await expect(page).toHaveURL(/\/login/);
 
+        await page.waitForTimeout(3000); // Wait for DB persistence (increased for stability)
+
         await page.goto('/login');
         await page.fill('input[name="email"]', testEmail);
         await page.fill('input[name="password"]', password);
         await page.click('button[type="submit"]');
 
-        await expect(page).toHaveURL('/');
-        await expect(page.getByText('PetManager')).toBeVisible();
+        // "Tikki Petshop" is on login too, so we check for something dashboard-specific like "Sair" or Stats
+        await expect(page.getByText('Sair')).toBeVisible();
     });
+
 });

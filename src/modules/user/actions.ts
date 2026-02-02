@@ -23,13 +23,21 @@ export async function updateUser(values: z.infer<typeof ProfileSchema>) {
     const { name, email, currentPassword, newPassword } = validatedFields.data;
 
     try {
-        if (newPassword && currentPassword) {
-            const dbUser = await prisma.user.findUnique({
-                where: { id: session.user.id },
-            });
+        const dbUser = await prisma.user.findUnique({
+            where: { id: session.user.id },
+        });
 
-            if (!dbUser || !dbUser.password) {
-                return { error: "Usuário não encontrado" };
+        if (!dbUser || !dbUser.password) {
+            return { error: "Usuário não encontrado" };
+        }
+
+        const isEmailChange = email !== dbUser.email;
+        const isPasswordChange = !!newPassword;
+
+        // Require current password if email or password is being changed
+        if (isEmailChange || isPasswordChange) {
+            if (!currentPassword) {
+                return { error: "Senha atual é necessária para alterar e-mail ou senha" };
             }
 
             const passwordsMatch = await bcrypt.compare(currentPassword, dbUser.password);
@@ -37,19 +45,29 @@ export async function updateUser(values: z.infer<typeof ProfileSchema>) {
             if (!passwordsMatch) {
                 return { error: "Senha atual incorreta" };
             }
-
-            const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-            await prisma.user.update({
-                where: { id: session.user.id },
-                data: { name, email, password: hashedPassword },
-            });
-        } else {
-            await prisma.user.update({
-                where: { id: session.user.id },
-                data: { name, email },
-            });
         }
+
+        // Check if new email is already taken by another user
+        if (isEmailChange) {
+            const existingUser = await prisma.user.findUnique({
+                where: { email },
+            });
+
+            if (existingUser) {
+                return { error: "Este e-mail já está em uso" };
+            }
+        }
+
+        const updateData: any = { name, email };
+
+        if (isPasswordChange) {
+            updateData.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: updateData,
+        });
 
         revalidatePath("/");
         return { success: "Perfil atualizado com sucesso!" };

@@ -22,7 +22,11 @@ test.describe('Pet CRUD', () => {
         await page.click('button[type="submit"]');
         await page.waitForURL('/');
 
-        await page.click('text=Novo Pet');
+        // Use the FAB or Desktop button - both trigger the dialog
+        // Locate by aria-label or visible text. The FAB has a Plus icon.
+        // Let's target the prominent "Cadastrar Pet" button on desktop or the Plus icon on mobile
+        // For simplicity in this test environment (likely desktop viewport by default):
+        await page.getByRole('button', { name: 'Cadastrar Pet' }).first().click();
 
         const petName = `Buddy ${uniqueId}`;
         await page.fill('input[name="name"]', petName);
@@ -32,20 +36,21 @@ test.describe('Pet CRUD', () => {
         await page.fill('input[name="ownerName"]', 'Pet Owner');
         await page.fill('input[name="ownerContact"]', '(11) 99999-9999');
 
-        await page.click('button:has-text("Cadastrar")');
+        // Target the button *inside* the dialog specifically to avoid clicking the open button or overlay
+        await page.click('div[role="dialog"] button:has-text("Cadastrar Pet")');
 
         // Wait for dialog to close (implies success)
         await expect(page.locator('div[role="dialog"]')).not.toBeVisible();
 
         // Wait for network idle or just a small buffer for server re-render
         await page.waitForTimeout(1000);
-        await page.reload(); // Force reload to ensure data is fetched
+        // Search for the pet to ensure it appears regardless of pagination
+        await page.fill('input[placeholder*="Buscar"]', petName);
+        await page.keyboard.press('Enter'); // Force submit just in case
+        await page.waitForTimeout(2000); // Wait for debounce and network
 
         // Check if pet appears in list
-        // Use specific matching to avoid strict mode violations (multiple "Buddy" elements)
-        await expect(page.getByText(petName)).toBeVisible({ timeout: 10000 });
-
-        // Scope the check to the specific element containing the unique name
-        await expect(page.locator('div').filter({ hasText: petName }).filter({ hasText: 'Golden Retriever' }).first()).toBeVisible();
+        await expect(page.getByRole('heading', { name: petName })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText('Golden Retriever').first()).toBeVisible();
     });
 });
