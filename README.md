@@ -1,4 +1,4 @@
-# Tikki Petshop 🐾
+# Tikki Petshop 🐾 Desafio Fullstack
 
 Uma plataforma robusta para gerenciamento de petshops, desenvolvida como solução para o desafio técnico Fullstack Jr. da Interato. O foco principal deste projeto é a **segurança de dados**, **arquitetura modular** e uma **experiência de usuário fluida**.
 
